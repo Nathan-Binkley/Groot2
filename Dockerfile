@@ -31,6 +31,11 @@ RUN echo "buildscript { repositories { maven { url 'https://repo.maven.apache.or
     cat build.gradle >> build.gradle.tmp && \
     mv build.gradle.tmp build.gradle
 
+# Add H2 dependency to build.gradle properly
+RUN grep -q "dependencies {" build.gradle && \
+    sed -i '/dependencies {/a \    implementation "com.h2database:h2:2.2.224"' build.gradle || \
+    echo "dependencies { implementation 'com.h2database:h2:2.2.224' }" >> build.gradle
+
 # Copy the source code
 COPY src ./src
 
