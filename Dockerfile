@@ -31,13 +31,16 @@ RUN echo "buildscript { repositories { maven { url 'https://repo.maven.apache.or
     cat build.gradle >> build.gradle.tmp && \
     mv build.gradle.tmp build.gradle
 
-# Add H2 dependency to build.gradle properly
+# Add PostgreSQL dependency to build.gradle properly
 RUN grep -q "dependencies {" build.gradle && \
-    sed -i '/dependencies {/a \    implementation "com.h2database:h2:2.2.224"' build.gradle || \
-    echo "dependencies { implementation 'com.h2database:h2:2.2.224' }" >> build.gradle
+    sed -i '/dependencies {/a \    implementation "org.postgresql:postgresql:42.6.0"' build.gradle || \
+    echo "dependencies { implementation 'org.postgresql:postgresql:42.6.0' }" >> build.gradle
 
 # Copy the source code
 COPY src ./src
+
+# Ensure the resources directory exists
+RUN mkdir -p src/main/resources
 
 # Build the application (specifically using bootJar)
 RUN gradle bootJar --no-daemon --info
@@ -45,13 +48,12 @@ RUN gradle bootJar --no-daemon --info
 # Set the JAR file as the entrypoint
 EXPOSE 8080
 
-# Set environment variables for H2 in-memory database
-ENV SPRING_DATASOURCE_URL=jdbc:h2:mem:restaurantdb
-ENV SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-ENV SPRING_DATASOURCE_USERNAME=sa
-ENV SPRING_DATASOURCE_PASSWORD=
-ENV SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-ENV SPRING_H2_CONSOLE_ENABLED=true
-ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
+# You can keep these as fallback, or remove them if you prefer to use only application.properties
+# ENV SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-cveq043qf0us7386ga8g-a.ohio-postgres.render.com:5432/consi
+# ENV SPRING_DATASOURCE_USERNAME=consi_user
+# ENV SPRING_DATASOURCE_PASSWORD=vL7kNtpc5B3RhlRDJrFieVjCugWlEfD0
+# ENV SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+# ENV SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+# ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
 CMD ["java", "-jar", "build/libs/restaurant-service-0.0.1-SNAPSHOT.jar"] 
