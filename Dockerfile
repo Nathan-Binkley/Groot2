@@ -32,11 +32,21 @@ RUN echo "buildscript { repositories { maven { url 'https://repo.maven.apache.or
     mv build.gradle.tmp build.gradle
 
 # Copy the source code
-COPY src_og ./src
+COPY src ./src
 
 # Build the application (specifically using bootJar)
 RUN gradle bootJar --no-daemon --info
 
 # Set the JAR file as the entrypoint
 EXPOSE 8080
+
+# Set environment variables for H2 in-memory database
+ENV SPRING_DATASOURCE_URL=jdbc:h2:mem:restaurantdb
+ENV SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+ENV SPRING_DATASOURCE_USERNAME=sa
+ENV SPRING_DATASOURCE_PASSWORD=
+ENV SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+ENV SPRING_H2_CONSOLE_ENABLED=true
+ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
 CMD ["java", "-jar", "build/libs/restaurant-service-0.0.1-SNAPSHOT.jar"] 
