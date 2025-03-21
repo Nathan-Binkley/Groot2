@@ -1,10 +1,11 @@
 package com.restaurant.health;
 
-import com.restaurant.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
+
+import com.restaurant.service.RestaurantService;
 
 @Component
 public class RestaurantServiceHealthIndicator implements HealthIndicator {
