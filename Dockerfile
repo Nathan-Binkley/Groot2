@@ -32,7 +32,7 @@ RUN echo "buildscript { repositories { maven { url 'https://repo.maven.apache.or
     mv build.gradle.tmp build.gradle
 
 # Copy the source code
-COPY src ./src
+COPY src_og ./src
 
 # Build the application (specifically using bootJar)
 RUN gradle bootJar --no-daemon --info
