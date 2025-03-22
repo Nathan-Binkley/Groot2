@@ -4,26 +4,44 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
+@Table(name = "addresses")
 public class Address {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @Column
     private String street;
 
-    @NotBlank
+    @Column
     private String city;
 
-    @NotBlank
+    @Column
     private String state;
 
-    @NotBlank
+    @Column
     private String zipCode;
+
+    @Column
+    private String country;
+
+    // Constructors
+    public Address() {
+    }
+
+    public Address(String street, String city, String state, String zipCode, String country) {
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -64,5 +82,18 @@ public class Address {
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    @Override
+    public String toString() {
+        return street + ", " + city + ", " + state + " " + zipCode + ", " + country;
     }
 }

@@ -1,28 +1,61 @@
 package com.restaurant.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
 @Entity
+@Table(name = "restaurants")
 public class Restaurant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @Column(nullable = false)
     private String name;
 
+    @Column(length = 1000)
     private String description;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id")
+    private Address address;
+
+    @Column
     private String phone;
 
+    @Column
+    private String email;
+
+    @Column
     private String website;
 
+    @Column
+    private LocalTime openingTime;
+
+    @Column
+    private LocalTime closingTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RestaurantCategory category;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Address address;
+    private Address addressEntity;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "restaurant_id")
@@ -31,6 +64,24 @@ public class Restaurant {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "restaurant_id")
     private List<Review> reviews = new ArrayList<>();
+
+    // Constructors
+    public Restaurant() {
+    }
+
+    public Restaurant(String name, String description, Address address, String phone, 
+                     String email, String website, LocalTime openingTime, 
+                     LocalTime closingTime, RestaurantCategory category) {
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        this.phone = phone;
+        this.email = email;
+        this.website = website;
+        this.openingTime = openingTime;
+        this.closingTime = closingTime;
+        this.category = category;
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -57,12 +108,28 @@ public class Restaurant {
         this.description = description;
     }
 
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
     public String getPhone() {
         return phone;
     }
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getWebsite() {
@@ -73,12 +140,36 @@ public class Restaurant {
         this.website = website;
     }
 
-    public Address getAddress() {
-        return address;
+    public LocalTime getOpeningTime() {
+        return openingTime;
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
+
+    public LocalTime getClosingTime() {
+        return closingTime;
+    }
+
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
+    }
+
+    public RestaurantCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(RestaurantCategory category) {
+        this.category = category;
+    }
+
+    public Address getAddressEntity() {
+        return addressEntity;
+    }
+
+    public void setAddressEntity(Address addressEntity) {
+        this.addressEntity = addressEntity;
     }
 
     public List<MenuItem> getMenuItems() {

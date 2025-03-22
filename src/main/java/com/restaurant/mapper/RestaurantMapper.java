@@ -138,7 +138,7 @@ public class RestaurantMapper {
         review.setId(dto.getId());
         review.setReviewerName(dto.getReviewerName());
         review.setRating(dto.getRating());
-        review.setComment(dto.getComment());
+        review.setContent(dto.getContent());
         review.setCreatedAt(dto.getCreatedAt());
         
         return review;
@@ -153,7 +153,7 @@ public class RestaurantMapper {
         dto.setId(entity.getId());
         dto.setReviewerName(entity.getReviewerName());
         dto.setRating(entity.getRating());
-        dto.setComment(entity.getComment());
+        dto.setContent(entity.getContent());
         dto.setCreatedAt(entity.getCreatedAt());
         
         return dto;

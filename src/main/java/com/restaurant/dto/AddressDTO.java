@@ -18,6 +18,20 @@ public class AddressDTO {
     @NotBlank(message = "Zip code is required")
     private String zipCode;
     
+    private String country;
+    
+    // Constructors
+    public AddressDTO() {
+    }
+    
+    public AddressDTO(String street, String city, String state, String zipCode, String country) {
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+    }
+    
     // Getters and Setters
     public Long getId() {
         return id;
@@ -57,5 +71,18 @@ public class AddressDTO {
     
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
+    }
+    
+    public String getCountry() {
+        return country;
+    }
+    
+    public void setCountry(String country) {
+        this.country = country;
+    }
+    
+    @Override
+    public String toString() {
+        return street + ", " + city + ", " + state + " " + zipCode + ", " + country;
     }
 } 

@@ -1,7 +1,7 @@
 package com.restaurant.controller;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.dto.RestaurantDTO;
-import com.restaurant.mapper.RestaurantMapper;
-import com.restaurant.model.Restaurant;
+import com.restaurant.model.RestaurantCategory;
 import com.restaurant.service.RestaurantService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,12 +33,10 @@ import jakarta.validation.Valid;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
-    private final RestaurantMapper restaurantMapper;
 
     @Autowired
-    public RestaurantController(RestaurantService restaurantService, RestaurantMapper restaurantMapper) {
+    public RestaurantController(RestaurantService restaurantService) {
         this.restaurantService = restaurantService;
-        this.restaurantMapper = restaurantMapper;
     }
 
     @PostMapping
@@ -51,9 +49,30 @@ public class RestaurantController {
         }
     )
     public ResponseEntity<RestaurantDTO> createRestaurant(@Valid @RequestBody RestaurantDTO restaurantDTO) {
-        Restaurant restaurant = restaurantMapper.toEntity(restaurantDTO);
-        Restaurant savedRestaurant = restaurantService.saveRestaurant(restaurant);
-        return new ResponseEntity<>(restaurantMapper.toDto(savedRestaurant), HttpStatus.CREATED);
+        RestaurantDTO createdRestaurant = restaurantService.createRestaurant(restaurantDTO);
+        return new ResponseEntity<>(createdRestaurant, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    @Operation(
+        summary = "Get all restaurants",
+        description = "Returns a list of all restaurants"
+    )
+    public ResponseEntity<List<RestaurantDTO>> getAllRestaurants(
+            @RequestParam(required = false) RestaurantCategory category,
+            @RequestParam(required = false) String name) {
+        
+        List<RestaurantDTO> restaurants;
+        
+        if (category != null) {
+            restaurants = restaurantService.getRestaurantsByCategory(category);
+        } else if (name != null && !name.isEmpty()) {
+            restaurants = restaurantService.searchRestaurantsByName(name);
+        } else {
+            restaurants = restaurantService.getAllRestaurants();
+        }
+        
+        return ResponseEntity.ok(restaurants);
     }
 
     @GetMapping("/{id}")
@@ -67,39 +86,9 @@ public class RestaurantController {
     )
     public ResponseEntity<RestaurantDTO> getRestaurantById(
             @Parameter(description = "Restaurant ID") @PathVariable Long id) {
-        Optional<Restaurant> restaurant = restaurantService.getRestaurantById(id);
-        return restaurant.map(r -> new ResponseEntity<>(restaurantMapper.toDto(r), HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @GetMapping
-    @Operation(
-        summary = "Get all restaurants",
-        description = "Returns a list of all restaurants"
-    )
-    public ResponseEntity<List<RestaurantDTO>> getAllRestaurants() {
-        List<Restaurant> restaurants = restaurantService.getAllRestaurants();
-        List<RestaurantDTO> restaurantDTOs = restaurants.stream()
-                .map(restaurantMapper::toDto)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(restaurantDTOs, HttpStatus.OK);
-    }
-
-    @GetMapping("/zipcode/{zipCode}")
-    @Operation(
-        summary = "Get restaurants by zipcode",
-        description = "Returns a list of restaurants in the specified zip code",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Restaurants found")
-        }
-    )
-    public ResponseEntity<List<RestaurantDTO>> getRestaurantsByZipCode(
-            @Parameter(description = "Zip code") @PathVariable String zipCode) {
-        List<Restaurant> restaurants = restaurantService.getRestaurantsByZipCode(zipCode);
-        List<RestaurantDTO> restaurantDTOs = restaurants.stream()
-                .map(restaurantMapper::toDto)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(restaurantDTOs, HttpStatus.OK);
+        return restaurantService.getRestaurantById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
@@ -115,15 +104,13 @@ public class RestaurantController {
     public ResponseEntity<RestaurantDTO> updateRestaurant(
             @Parameter(description = "Restaurant ID") @PathVariable Long id, 
             @Valid @RequestBody RestaurantDTO restaurantDTO) {
-        Optional<Restaurant> existingRestaurant = restaurantService.getRestaurantById(id);
-        if (existingRestaurant.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        RestaurantDTO updatedRestaurant = restaurantService.updateRestaurant(id, restaurantDTO);
+        
+        if (updatedRestaurant != null) {
+            return ResponseEntity.ok(updatedRestaurant);
         }
         
-        restaurantDTO.setId(id);
-        Restaurant restaurant = restaurantMapper.toEntity(restaurantDTO);
-        Restaurant updatedRestaurant = restaurantService.saveRestaurant(restaurant);
-        return new ResponseEntity<>(restaurantMapper.toDto(updatedRestaurant), HttpStatus.OK);
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -137,12 +124,40 @@ public class RestaurantController {
     )
     public ResponseEntity<Void> deleteRestaurant(
             @Parameter(description = "Restaurant ID") @PathVariable Long id) {
-        Optional<Restaurant> restaurant = restaurantService.getRestaurantById(id);
-        if (restaurant.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        boolean deleted = restaurantService.deleteRestaurant(id);
+        
+        if (deleted) {
+            return ResponseEntity.noContent().build();
         }
         
-        restaurantService.deleteRestaurant(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.notFound().build();
+    }
+    
+    @GetMapping("/categories")
+    public ResponseEntity<List<CategoryInfo>> getAllCategories() {
+        List<CategoryInfo> categories = Arrays.stream(RestaurantCategory.values())
+                .map(category -> new CategoryInfo(category.name(), category.getDisplayName()))
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(categories);
+    }
+    
+    // Helper class for category info response
+    private static class CategoryInfo {
+        private String code;
+        private String displayName;
+        
+        public CategoryInfo(String code, String displayName) {
+            this.code = code;
+            this.displayName = displayName;
+        }
+        
+        public String getCode() {
+            return code;
+        }
+        
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 } 

@@ -1,24 +1,23 @@
 package com.restaurant.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class ReviewDTO {
-    
     private Long id;
-    
-    @NotBlank(message = "Reviewer name is required")
     private String reviewerName;
-    
-    @Min(value = 1, message = "Rating must be at least 1")
-    @Max(value = 5, message = "Rating cannot be more than 5")
+    private String content;
     private Integer rating;
-    
-    private String comment;
-    
     private LocalDateTime createdAt;
+    private String reviewType;  // "RESTAURANT" or "MENU_ITEM"
+    private Long menuItemId;  // Only used for menu item reviews
+    private String menuItemName; // For displaying the menu item name
+    private Long restaurantId; // Only used for restaurant reviews
+    private String restaurantName; // For displaying the restaurant name
+    private boolean approved;
+    
+    // Constructors
+    public ReviewDTO() {
+    }
     
     // Getters and Setters
     public Long getId() {
@@ -37,6 +36,14 @@ public class ReviewDTO {
         this.reviewerName = reviewerName;
     }
     
+    public String getContent() {
+        return content;
+    }
+    
+    public void setContent(String content) {
+        this.content = content;
+    }
+    
     public Integer getRating() {
         return rating;
     }
@@ -45,19 +52,59 @@ public class ReviewDTO {
         this.rating = rating;
     }
     
-    public String getComment() {
-        return comment;
-    }
-    
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-    
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
     
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public String getReviewType() {
+        return reviewType;
+    }
+    
+    public void setReviewType(String reviewType) {
+        this.reviewType = reviewType;
+    }
+    
+    public Long getMenuItemId() {
+        return menuItemId;
+    }
+    
+    public void setMenuItemId(Long menuItemId) {
+        this.menuItemId = menuItemId;
+    }
+    
+    public String getMenuItemName() {
+        return menuItemName;
+    }
+    
+    public void setMenuItemName(String menuItemName) {
+        this.menuItemName = menuItemName;
+    }
+    
+    public Long getRestaurantId() {
+        return restaurantId;
+    }
+    
+    public void setRestaurantId(Long restaurantId) {
+        this.restaurantId = restaurantId;
+    }
+    
+    public String getRestaurantName() {
+        return restaurantName;
+    }
+    
+    public void setRestaurantName(String restaurantName) {
+        this.restaurantName = restaurantName;
+    }
+    
+    public boolean isApproved() {
+        return approved;
+    }
+    
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 } 
